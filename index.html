@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Teachable Machine Model</title>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+</head>
+<body>
+  <h1>Test My Teachable Machine Model</h1>
+  <button type="button" onclick="init()">Load Model</button>
+  <input type="file" id="imageInput" accept="image/*" />
+  <p id="prediction">Prediction: N/A</p>
+
+  <script>
+    let model, labelContainer;
+
+    async function init() {
+      const URL = "./";
+      const modelURL = URL + "model.json";
+      const metadataURL = URL + "metadata.json";
+
+      model = await tmImage.load(modelURL, metadataURL);
+      labelContainer = document.getElementById("prediction");
+
+      document.getElementById("imageInput").addEventListener("change", handleImage);
+    }
+
+    async function handleImage(event) {
+      const file = event.target.files[0];
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = async () => {
+        const prediction = await model.predict(img);
+        const top = prediction.reduce((a, b) => a.probability > b.probability ? a : b);
+        labelContainer.innerText = `Prediction: ${top.className} (${(top.probability * 100).toFixed(2)}%)`;
+      };
+    }
+  </script>
+</body>
+</html>
